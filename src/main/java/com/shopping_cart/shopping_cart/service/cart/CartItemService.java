@@ -9,6 +9,7 @@ import com.shopping_cart.shopping_cart.repository.CartRepository;
 import com.shopping_cart.shopping_cart.service.product.IProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.math.BigDecimal;
 
@@ -23,6 +24,7 @@ public class CartItemService implements ICartItemService {
     @Override
     public CartItem addItemToCart(Long cartId, Long productId, int quantity) {
         // 1- get the cart
+
         Cart cart = cartService.getCart(cartId);
 
         // 2- get the product
@@ -32,23 +34,29 @@ public class CartItemService implements ICartItemService {
         CartItem cartItem = cart.getItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst().orElse(new CartItem());
-
+        System.out.println("cartItem = " + cartItem);
         // 4- if yes then increase the quantity with the requested quantity.
         if (cartItem.getProduct().getId().equals(productId)) {
             cartItem.setQuantity(cartItem.getQuantity() + quantity);
+            System.out.println("cartItem 2= " + cartItem);
+
         } else {
             // 5- if no, then initiate a new cartItem entry.
             cartItem.setCart(cart);
             cartItem.setProduct(product);
             cartItem.setQuantity(quantity);
             cartItem.setUnitPrice(product.getPrice());
+            System.out.println("cartItem3 = " + cartItem);
+
         }
+
+        System.out.println("cartItem4 = " + cartItem);
 
         cartItem.setTotalPrice();
         cart.addItem(cartItem);
         cartItemRepository.save(cartItem);
         cartRepository.save(cart);
-        return null;
+        return cartItem;
     }
 
     @Override
@@ -89,5 +97,6 @@ public class CartItemService implements ICartItemService {
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotfoundException("item not found in cart"));
     }
+
 
 }
